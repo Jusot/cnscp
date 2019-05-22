@@ -210,7 +210,7 @@ int DH::S()
 	cout << "Sb:" << Sb << endl;
 
 	return 0;
- }
+}
 
 int main()
 {
@@ -224,4 +224,3 @@ int main()
 
     return 0;
 }
-
