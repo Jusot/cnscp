@@ -1,29 +1,13 @@
 #include <iostream>
 #include <vector>
+
+#include "rc4.hpp"
+
 using namespace std;
 
-class RC4
+namespace RC4
 {
-public:
-	RC4(int n, string key);
-	~RC4();
-	vector<int> list();
-	int get();
-	int n() const
-	{
-		return n_;
-	}
-
-private:
-	int n_;
-	int p_ = 0;
-	int q_ = 0;
-	int *S_;
-	char *T_;
-};
-
 RC4::RC4(int n, string key)
-  : n_(n)
 {
 	S_ = new int[n]();
 	T_ = new char[n]();
@@ -47,7 +31,16 @@ RC4::~RC4()
 	delete[] T_;
 }
 
-vector<int> RC4::list()
+int RC4::gen_one()
+{
+	p_ = (p_ + 1) % 256;
+	q_ = (q_ + S_[p_]) % 256;
+	swap(S_[p_], S_[q_]);
+	int t = (S_[p_] + S_[q_]) % 256;
+	return S_[t];
+}
+
+vector<int> RC4::gen_list()
 {
 	vector<int> result;
 
@@ -59,12 +52,4 @@ vector<int> RC4::list()
 
 	return result;
 }
-
-int RC4::get()
-{
-	p_ = (p_ + 1) % 256;
-	q_ = (q_ + S_[p_]) % 256;
-	swap(S_[p_], S_[q_]);
-	int t = (S_[p_] + S_[q_]) % 256;
-	return S_[t];
-}
+} // namespace RC4
