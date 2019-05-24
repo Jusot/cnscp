@@ -2,15 +2,21 @@
 #include <vector>
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
+
+#include "rsa.hpp"
 
 using namespace std;
 
+namespace 
+{
 uint64_t gcd(uint64_t a, uint64_t b)
 {
 	return b > 0 ? gcd(b, a % b) : a;
 }
+} // namespace
 
+namespace RSA
+{
 uint64_t random_prime(string key, uint64_t size)
 {
 	uint64_t *S = new uint64_t[size + 1],
@@ -65,34 +71,19 @@ uint64_t random_prime(string key, uint64_t size)
 	return k;
 }
 
-vector<uint64_t> encrypt(uint64_t n, uint64_t e, const vector<uint64_t> &M)
+vector<uint64_t> crypt(uint64_t n, uint64_t k, const vector<uint64_t> &input)
 {
-	vector<uint64_t> C = M;
+	vector<uint64_t> output = input;
 
-	for (size_t i = 0; i < M.size(); ++i)
+	for (size_t i = 0; i < output.size(); ++i)
 	{
-		for (uint64_t j = 0; j < e - 1; j++)
+		for (uint64_t j = 0; j < k - 1; j++)
 		{
-			C[i] = ((C[i] % n) * (M[i] % n)) % n;
+			output[i] = ((output[i] % n) * (input[i] % n)) % n;
 		}
 	}
 
-	return C;
-}
-
-vector<uint64_t> decrypt(uint64_t n, uint64_t d, const vector<uint64_t> &C)
-{
-	vector<uint64_t> M = C;
-
-	for (size_t i = 0; i < M.size(); ++i)
-	{
-		for (uint64_t j = 0; j < d - 1; j++)
-		{
-			M[i] = ((M[i] % n) * (C[i] % n)) % n;
-		}
-	}
-
-	return M;
+	return output;
 }
 
 vector<uint64_t> get_elist(uint64_t p, uint64_t q)
@@ -133,30 +124,4 @@ uint64_t choose_d(uint64_t p, uint64_t q, uint64_t e)
 
 	return d;
 }
-
-int main()
-{
-	uint64_t prime_size = 100000;
-
-	uint64_t p = random_prime("bobobobobo", prime_size);
-	uint64_t q = random_prime("lololololo", prime_size);
-	uint64_t n = p * q;
-	uint64_t e = choose_emax(p, q);
-	uint64_t d = choose_d(p, q, e);
-
-	vector<uint64_t> M { 3462,34543,2345,234,6788 };
-
-	auto C = encrypt(n, e, M);
-	auto rM = decrypt(n, d, C);
-
-	{
-		for (auto m: M) cout << m << " ";
-		cout << endl;
-		for (auto c: C) cout << c << " ";
-		cout << endl;
-		for (auto rm: rM) cout << rm << " ";
-		cout << endl;
-	}
-
-	return 0;
-}
+} // namespace RSA
