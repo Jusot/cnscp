@@ -1,92 +1,70 @@
-// RC4.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
-
 #include <iostream>
-
+#include <vector>
 using namespace std;
 
 class RC4
 {
 public:
-	RC4();
+	RC4(int n, string key);
 	~RC4();
-	int RC4_swap();
-	int out();
+	vector<int> list();
+	int get();
+	int n() const
+	{
+		return n_;
+	}
 
 private:
-	int S[256];
-	char T[256];
-	string key;
-	int k = 0;
+	int n_;
+	int p_ = 0;
+	int q_ = 0;
+	int *S_;
+	char *T_;
 };
 
-RC4::RC4()
+RC4::RC4(int n, string key)
+  : n_(n)
 {
-	memset(S, 256, sizeof(S));
-	memset(T, 256, sizeof(T));
-	int i;
-	for (i = 0; i < 256; i++)
+	S_ = new int[n]();
+	T_ = new char[n]();
+
+	for (int i = 0; i < 256; i++)
+		S_[i] = i;
+
+	for (int i = 0, j = 0; i < 256; i++)
 	{
-		S[i] = i;
+		T_[i] = key[j++];
+		if (j == key.length()) j = 0;
 	}
-	cout << "Please enter the key：" << endl;
-	cin >> key;
-	int j = 0;
-	int len = key.length();
-	for (i = 0; i < 256; i++)
-	{
-		T[i] = key[j];
-		j++;
-		if (j == len) j = 0;
-	}
+
+	for (int i = 0, j = 0; i < 256; i++)
+		swap(S_[i], S_[(j = (j + S_[i] + T_[i]) % 256)]);
 }
 
 RC4::~RC4()
 {
+	delete[] S_;
+	delete[] T_;
 }
 
-int RC4::RC4_swap()
+vector<int> RC4::list()
 {
-	int j = 0;
-	for (int i = 0; i < 256; i++)
-	{
-		j = (j + S[i] + T[i]) % 256;
-		swap(S[i], S[j]);
-	}
-	return 0;
+	vector<int> result;
+
+	for (int i = 0; i < 256; ++i)
+		result.push_back(S_[i]);
+
+	for (int i = 0, j = 0; i < 256; i++)
+		swap(S_[i], S_[(j = (j + S_[i] + T_[i]) % 256)]);
+
+	return result;
 }
 
-int RC4::out()
+int RC4::get()
 {
-	int i = 0;
-	int j = 0;
-	while (true)
-	{
-		i = (i + 1) % 256;
-		j = (j + S[i]) % 256;
-		swap(S[i], S[j]);
-		int t = (S[i] + S[j]) % 256;
-		k = S[t];
-		if (getchar()) cout << k;
-	}
-	return 0;
+	p_ = (p_ + 1) % 256;
+	q_ = (q_ + S_[p_]) % 256;
+	swap(S_[p_], S_[q_]);
+	int t = (S_[p_] + S_[q_]) % 256;
+	return S_[t];
 }
-
-int main()
-{
-	RC4 a = RC4();
-	a.RC4_swap();
-	a.out();
-	return 0;
-}
-
-// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
-// 调试程序: F5 或调试 >“开始调试”菜单
-
-// 入门提示: 
-//   1. 使用解决方案资源管理器窗口添加/管理文件
-//   2. 使用团队资源管理器窗口连接到源代码管理
-//   3. 使用输出窗口查看生成输出和其他消息
-//   4. 使用错误列表窗口查看错误
-//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
-//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
