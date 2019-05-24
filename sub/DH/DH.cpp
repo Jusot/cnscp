@@ -1,10 +1,11 @@
 #include <tuple>
 #include <string>
-#include <iostream>
 
 using namespace std;
 
-int RC4(int n, string key)
+namespace DH
+{
+int ramdom_int(int n, string key)
 {
 	int *S = new int[n](), i, j;
 	char *T = new char[n]();
@@ -52,21 +53,4 @@ int DH_S(int q, int X, int Y)
 	}
 	return S;
 }
-
-int main()
-{
-	int a = 3, q = 23;
-
-	auto [Xa, Xb] = make_tuple(RC4(q, "lolo"), RC4(q, "bobo"));
-	auto [Ya, Yb] = make_tuple(DH_Y(a, q, Xa), DH_Y(a, q, Xb));
-	auto [Sa, Sb] = make_tuple(DH_S(q, Xa, Yb), DH_S(q, Xb, Ya));
-
-	cout << "Xa: " << Xa << endl;
-	cout << "Ya: " << Ya << endl;
-	cout << "Sa: " << Sa << endl;
-	cout << "Xb: " << Xb << endl;
-	cout << "Yb: " << Yb << endl;
-	cout << "Sb: " << Sb << endl;
-
-    return 0;
-}
+} // namespace DH
