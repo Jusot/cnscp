@@ -4,8 +4,6 @@
 #include <cstdlib>
 #include <iostream>
 
-#define SIZE 10000
-
 using namespace std;
 
 uint64_t gcd(uint64_t a, uint64_t b)
@@ -15,13 +13,11 @@ uint64_t gcd(uint64_t a, uint64_t b)
 
 uint64_t random_prime(string key, uint64_t size)
 {
-	uint64_t *S = new uint64_t[size+1];
-	char* T = new char[size+1];
-	
-	uint64_t k = 0, i, j;
+	uint64_t *S = new uint64_t[size + 1],
+			  k = 0, i, j;
+	char* T = new char[size + 1];
 
-	for (i = 0; i < size; i++)
-		S[i] = i;
+	for (i = 0; i < size; i++) S[i] = i;
 
 	for (i = j = 0; i < size; i++)
 	{
@@ -39,9 +35,9 @@ uint64_t random_prime(string key, uint64_t size)
 		i = (i + 1) % size;
 		j = (j + S[i]) % size;
 		swap(S[i], S[j]);
-		uint64_t t = (S[i] + S[j]) % size;
-		k = S[t];
 
+		uint64_t t = (S[i] + S[j]) % size;	
+		k = S[t];
 		while (i < size)
 		{
 			if ((S[i] < k) && (S[i] > 1))
@@ -65,35 +61,41 @@ uint64_t random_prime(string key, uint64_t size)
 		}
 		if (count == 1000) break;
 	}
+
 	return k;
 }
 
-uint64_t E(uint64_t n, uint64_t e, uint64_t *M, uint64_t len, uint64_t *C)
+vector<uint64_t> encrypt(uint64_t n, uint64_t e, const vector<uint64_t> &M)
 {
-	for (uint64_t i = 0; i < len; i++)
+	vector<uint64_t> C = M;
+
+	for (size_t i = 0; i < M.size(); ++i)
 	{
-		C[i] = M[i];
-		for (uint64_t j = 0; j < e - 1;j++)//C[i] = (uint64_t)pow(M[i], d) % n;
+		for (uint64_t j = 0; j < e - 1; j++)
 		{
-			C[i] = C[i] * M[i] % n;
+			C[i] = ((C[i] % n) * (M[i] % n)) % n;
 		}
 	}
-	return 0;
+
+	return C;
 }
 
-uint64_t D(uint64_t n, uint64_t d, uint64_t *C, uint64_t len, uint64_t *M)
+vector<uint64_t> decrypt(uint64_t n, uint64_t d, const vector<uint64_t> &C)
 {
-	for (uint64_t i = 0; i < len; i++)
+	vector<uint64_t> M = C;
+
+	for (size_t i = 0; i < M.size(); ++i)
 	{
-		M[i] = C[i];
 		for (uint64_t j = 0; j < d - 1; j++)
 		{
-			M[i] = M[i]* C[i] % n;
+			M[i] = ((M[i] % n) * (C[i] % n)) % n;
 		}
 	}
-	return 0;
+
+	return M;
 }
-vector<uint64_t>get_elist(uint64_t p, uint64_t q)
+
+vector<uint64_t> get_elist(uint64_t p, uint64_t q)
 {
 	vector<uint64_t> elist;
 
@@ -111,16 +113,15 @@ vector<uint64_t>get_elist(uint64_t p, uint64_t q)
 
 uint64_t choose_emax(uint64_t p, uint64_t q)
 {
-	uint64_t x = (p - 1) * (q - 1);
-	uint64_t e;
+	uint64_t x = (p - 1) * (q - 1), e;
 
-	vector<uint64_t> elist;
-	for (e = x - 1; e > x - 100; e--)
-	{
-		if (gcd(e, x) == 1) break;
-	}
+	for (e = x - 1;
+		 e > x - 100 && gcd(e, x) != 1;
+		 e--);
+
 	return e;
 }
+
 uint64_t choose_d(uint64_t p, uint64_t q, uint64_t e)
 {
 	uint64_t x = (p - 1) * (q - 1), d;
@@ -129,29 +130,33 @@ uint64_t choose_d(uint64_t p, uint64_t q, uint64_t e)
 	{
 		if ((e * d) % x == 1) break;
 	}
+
 	return d;
-}
-
-int dragon()
-{
-	uint64_t p = random_prime("bobobobobo", SIZE);
-	uint64_t q = random_prime("lololololo", SIZE);
-	uint64_t n = p * q;
-	uint64_t e = choose_emax(p, q);
-	uint64_t d = choose_d(p, q, e);
-
-	uint64_t M[64] = { 3462,34543,2345,234,6788 };
-	uint64_t C[64] = { 0 };
-	uint64_t R[64] = { 0 };
-
-	E(n, e, M, 5, C);
-	D(n, d, C, 5, R);
-
-	return 0;
 }
 
 int main()
 {
-	dragon();	
+	uint64_t prime_size = 100000;
+
+	uint64_t p = random_prime("bobobobobo", prime_size);
+	uint64_t q = random_prime("lololololo", prime_size);
+	uint64_t n = p * q;
+	uint64_t e = choose_emax(p, q);
+	uint64_t d = choose_d(p, q, e);
+
+	vector<uint64_t> M { 3462,34543,2345,234,6788 };
+
+	auto C = encrypt(n, e, M);
+	auto rM = decrypt(n, d, C);
+
+	{
+		for (auto m: M) cout << m << " ";
+		cout << endl;
+		for (auto c: C) cout << c << " ";
+		cout << endl;
+		for (auto rm: rM) cout << rm << " ";
+		cout << endl;
+	}
+
 	return 0;
 }
