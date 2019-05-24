@@ -1,87 +1,64 @@
-// RSA.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
-
+#include <cmath>
+#include <vector>
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
-#include <math.h>
-#include <stdlib.h>
+
 #define SIZE 10000
-#define ULL unsigned long long
 
 using namespace std;
 
-ULL S[SIZE];
-char T[SIZE];
-
-ULL gcd(ULL a, ULL b)
+uint64_t gcd(uint64_t a, uint64_t b)
 {
 	return b > 0 ? gcd(b, a % b) : a;
 }
 
-ULL random_prime(ULL size)
+uint64_t random_prime(string key, uint64_t size)
 {
-	string key;
-	ULL k = 0;
+	uint64_t *S = new uint64_t[size+1];
+	char* T = new char[size+1];
+	
+	uint64_t k = 0, i, j;
 
-	ULL i, j;
-
-	memset(S, size, sizeof(S));
-	memset(T, size, sizeof(T));
 	for (i = 0; i < size; i++)
-	{
 		S[i] = i;
-	}
-	cout << "Please enter the key：" << endl;
-	cin >> key;
-	j = 0;
-	ULL len = key.length();
-	for (i = 0; i < size; i++)
+
+	for (i = j = 0; i < size; i++)
 	{
-		T[i] = key[j];
-		cout << T[i];
-		j++;
-		if (j == len) j = 0;
+		T[i] = key[j++];
+		if (j == key.length()) j = 0;
 	}
-	cout << endl;
 
-	cout << "Please waiting for swap" << endl;
-	//swap
-	j = 0;
-	for (i = 0; i < size; i++)
+	for (i = j = 0; i < size; i++)
+		swap(S[i], S[(j = (j + S[i] + T[i]) % size)]);
+
+	uint64_t count = 0;
+	while (true)
 	{
-		j = (j + S[i] + T[i]) % size;
-		swap(S[i], S[j]);
-	}
-	cout << "swap finished" << endl;
-
-
-
-	ULL count = 0;
-	while (1)
-	{
-		i = 0;
-		cout << "enter the while" << endl;
-
-		//new random number//随机一个大数
-		i = 0;
-		j = 0;
+		i = j = 0;
 		i = (i + 1) % size;
 		j = (j + S[i]) % size;
 		swap(S[i], S[j]);
-		ULL t = (S[i] + S[j]) % size;
+		uint64_t t = (S[i] + S[j]) % size;
 		k = S[t];
-		cout << k << endl;
 
 		while (i < size)
 		{
 			if ((S[i] < k) && (S[i] > 1))
 			{
-				if ((k % 2 == 0) || (k % 3 == 0) || (k % 5 == 0) || (k % 7 == 0) || (k % 11 == 0) || (k % 13 == 0) || (k % 17 == 0) || (k % 19 == 0) || k % S[i] == 0)
+				if ((k % 2 == 0) 
+				 || (k % 3 == 0) 
+				 || (k % 5 == 0) 
+				 || (k % 7 == 0) 
+				 || (k % 11 == 0) 
+				 || (k % 13 == 0) 
+				 || (k % 17 == 0) 
+				 || (k % 19 == 0) 
+				 || k % S[i] == 0)
 				{
-					cout << "Unluckly! " << k << " is not a prime." << endl;
-					break;//若找到因数 则重新产生一个大数
+					break;
 				}
 				count++;
-				cout << count << endl;
 			}
 			if (count == 1000) break;
 			i++;
@@ -91,86 +68,90 @@ ULL random_prime(ULL size)
 	return k;
 }
 
-ULL E(ULL n, ULL e, ULL *M, ULL len, ULL *C)
+uint64_t E(uint64_t n, uint64_t e, uint64_t *M, uint64_t len, uint64_t *C)
 {
-	for (ULL i = 0; i < len; i++)
+	for (uint64_t i = 0; i < len; i++)
 	{
 		C[i] = M[i];
-		for (ULL j = 0; j < e - 1;j++)//C[i] = (ULL)pow(M[i], d) % n;
+		for (uint64_t j = 0; j < e - 1;j++)//C[i] = (uint64_t)pow(M[i], d) % n;
 		{
 			C[i] = C[i] * M[i] % n;
 		}
 	}
-	for (ULL i = 0; i < len; i++)
-	{
-		cout << C[i] << " ";
-	}
-	cout << endl;
 	return 0;
 }
 
-ULL D(ULL n, ULL d, ULL *C, ULL len, ULL *M)
+uint64_t D(uint64_t n, uint64_t d, uint64_t *C, uint64_t len, uint64_t *M)
 {
-	for (ULL i = 0; i < len; i++)
+	for (uint64_t i = 0; i < len; i++)
 	{
 		M[i] = C[i];
-		for (ULL j = 0; j < d - 1; j++)//M[i] = (ULL)pow(C[i], d) % n;
+		for (uint64_t j = 0; j < d - 1; j++)
 		{
 			M[i] = M[i]* C[i] % n;
 		}
 	}
-	for (ULL i = 0; i < len; i++)
+	return 0;
+}
+vector<uint64_t>get_elist(uint64_t p, uint64_t q)
+{
+	vector<uint64_t> elist;
+
+	uint64_t x = (p - 1) * (q - 1);
+	for (uint64_t e = x - 1; e > x - 100; e--)
 	{
-		cout << M[i] << " ";
+		if (gcd(e, x) == 1)
+		{
+			elist.push_back(e);
+		}
 	}
-	cout << endl;
+
+	return elist;
+}
+
+uint64_t choose_emax(uint64_t p, uint64_t q)
+{
+	uint64_t x = (p - 1) * (q - 1);
+	uint64_t e;
+
+	vector<uint64_t> elist;
+	for (e = x - 1; e > x - 100; e--)
+	{
+		if (gcd(e, x) == 1) break;
+	}
+	return e;
+}
+uint64_t choose_d(uint64_t p, uint64_t q, uint64_t e)
+{
+	uint64_t x = (p - 1) * (q - 1), d;
+
+	for (d = x - 1; d > 0; d--)
+	{
+		if ((e * d) % x == 1) break;
+	}
+	return d;
+}
+
+int dragon()
+{
+	uint64_t p = random_prime("bobobobobo", SIZE);
+	uint64_t q = random_prime("lololololo", SIZE);
+	uint64_t n = p * q;
+	uint64_t e = choose_emax(p, q);
+	uint64_t d = choose_d(p, q, e);
+
+	uint64_t M[64] = { 3462,34543,2345,234,6788 };
+	uint64_t C[64] = { 0 };
+	uint64_t R[64] = { 0 };
+
+	E(n, e, M, 5, C);
+	D(n, d, C, 5, R);
+
 	return 0;
 }
 
 int main()
 {
-	ULL p = random_prime(SIZE);
-	ULL q = random_prime(SIZE);
-	ULL n = p * q;
-	ULL x = (p - 1) * (q - 1);
-	cout << x << endl;
-	ULL e;
-	ULL d;
-	cout << "The number you can choose for e:" << endl;
-	for (e = x - 1; e > x-100; e--)
-	{
-		if (gcd(e, x) == 1)
-		{
-			cout << e << " ";
-		}
-	}
-	cout << endl << "Please choose the e:" << endl;
-	cin >> e;
-
-	for (d = x - 1; d > 0; d--)
-	{
-		if ((e * d) % x == 1)
-		{
-			break;
-		}
-	}
-
-	ULL M[64] = { 3462,34543,2345,234,6788 };
-	ULL C[64] = { 0 };
-	ULL R[64] = { 0 };
-	E(n, e, M, 5, C);
-	D(n, d, C, 5, R);
-	
+	dragon();	
 	return 0;
 }
-
-// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
-// 调试程序: F5 或调试 >“开始调试”菜单
-
-// 入门提示: 
-//   1. 使用解决方案资源管理器窗口添加/管理文件
-//   2. 使用团队资源管理器窗口连接到源代码管理
-//   3. 使用输出窗口查看生成输出和其他消息
-//   4. 使用错误列表窗口查看错误
-//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
-//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
