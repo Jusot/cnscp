@@ -27,19 +27,23 @@ padding_and_append_len(vector<uint8_t> input)
     // step 1
     input.push_back(0b10000000);
     while (input.size() % 64 != 56)
+    {
         input.push_back(0);
+    }
     
     // step 2
     uint64_t tail = len;
     for (int i = 56; i >= 0; i -= 8)
+    {
         input.push_back(((tail & (0xFF << i)) >> i) & 0xFF);
+    }
 
     vector<uint32_t> res;
     for (size_t i = 0; i < input.size(); i += 4)
     {
         res.push_back(((input[i] & 0xFF) << 24) |
-            ((input[i + 1] & 0xFF) << 16) |
-            ((input[i + 2] & 0xFF) << 8) |
+            ((input[i + 1] & 0xFF) << 16)       |
+            ((input[i + 2] & 0xFF) << 8)        |
             ((input[i + 3] & 0xFF)));
     }
     return res;
@@ -95,37 +99,34 @@ sha256(const vector<uint8_t> &raw)
 
     array<uint32_t, 8> res =
     {
-        0x6A09E667,
-        0xBB67AE85,
-        0x3C6EF372,
-        0xA54FF53A,
-        0x510E527F,
-        0x9B05688C,
-        0x1F83D9AB,
-        0x5BE0CD19
+        0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+        0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
     };
 
     for (size_t i = 0; i < input.size(); i += 16)
     {
         array<uint32_t, 16> M;
         for (auto j = i; j < i + 16; ++j)
+        {
             M[j] = input[i + j];
+        }
 
         auto [A, B, C, D, E, F, G, H] = res;
 
         array<uint32_t, 64> W;
         for (int i = 0; i < 16; ++i)
+        {
             W[i] = M[i];
+        }
         for (int i = 16; i < 64; ++i)
+        {
             W[i] = (ssig1(W[i - 2]) + W[i - 7] + ssig0(W[i - 15]) + W[i - 16]) & 0xFFFFFFFF;
-
+        }
         for (int i = 0; i < 64; ++i)
         {
-            auto [T1, T2] = make_tuple
-            (
-                H + bsig1(E) + ch(E, F, G) + K[i] + W[i],
-                bsig0(A) + maj(A, B, C)
-            );
+            auto T1 = H + bsig1(E) + ch(E, F, G) + K[i] + W[i];
+            auto T2 = bsig0(A) + maj(A, B, C);
+
             tie(H, G, F, E, D, C, B, A) = make_tuple
             (
                 G, F, E, D + T1, C, B, A, T1 + T2
@@ -134,7 +135,9 @@ sha256(const vector<uint8_t> &raw)
 
         array<uint32_t, 8> vs = { A, B, C, D, E, F, G, H };
         for (size_t i = 0; i < 8; ++i)
+        {
             res[i] = (res[i] + vs[i]) & 0xFFFFFFFF;
+        }
     }
 
     return res;
