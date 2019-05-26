@@ -119,7 +119,7 @@ array<uint8_t, 16> aesencrypt128(array<uint8_t, 16> P, const array<uint8_t, 16> 
         P[i] ^= *key++;
     }
 
-    for (int i = 0; i < 9; ++i)
+    for (int j = 0; j < 9; ++j)
     {
         array<uint8_t, 16> T;
 
@@ -162,14 +162,12 @@ array<uint8_t, 16> aesdecrypt128(array<uint8_t, 16> P, const array<uint8_t, 16> 
         P[i] = INV_SBOX[P[i]];
 
     key -= 16;
-    for (int i = 0; i < 9; ++i, key -= 16)
+    for (int j = 0; j < 9; ++j, key -= 16)
     {
         array<uint8_t, 16> T;
 
         for (int i = 0; i < 16; ++i)
             T[i] = P[i] ^ key[i];
-        
-        shiftrows128(T);
 
         for (int i = 0; i < 16; i += 4)
         {
@@ -243,10 +241,20 @@ AES::decrypt::AES128(const vector<uint8_t> &plaintext, const array<uint8_t, 16> 
     return result;
 }
 
-vector<uint8_t> AES::encrypt::AES128(const string &plaintext, const std::string &key)
+string AES::encrypt::AES128(const string &plaintext, std::string key)
 {
     array<uint8_t, 16> k;
     for (size_t i = 0; i < 16; ++i)
-        k[i] = key[i];
-    return encrypt::AES128(vector<uint8_t>(plaintext.begin(), plaintext.end()), k);
+        k[i] = i < key.size() ? key[i] : 0;
+    auto C = encrypt::AES128(vector<uint8_t>(plaintext.begin(), plaintext.end()), k);
+    return string(C.begin(), C.end());
+}
+
+string AES::decrypt::AES128(const string &plaintext, std::string key)
+{
+    array<uint8_t, 16> k;
+    for (size_t i = 0; i < 16; ++i)
+        k[i] = i < key.size() ? key[i] : 0;
+    auto M = decrypt::AES128(vector<uint8_t>(plaintext.begin(), plaintext.end()), k);
+    return string(M.begin(), M.end());
 }

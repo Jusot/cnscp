@@ -1,15 +1,20 @@
 #include <iostream>
 
-#include "aes.hpp"
-
-#define TEST(str, key) cout << str << endl; for (auto c : encrypt::AES128(str, key)) cout << hex << c; cout << endl;
+#include "aes.cpp"
 
 using namespace std;
 using namespace AES;
 
 int main()
 {
-    TEST("woaini", "luoyuexuan");
+    string M = "woaini";
+    string key = "luoyuexuan";
 
+    auto C = encrypt::AES128(M, key);
+    auto Res = decrypt::AES128(C, key);
+
+    cout << C << endl;
+    cout << Res << endl;
+    
     return 0;
 }
