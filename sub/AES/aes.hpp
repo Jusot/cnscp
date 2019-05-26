@@ -3,32 +3,27 @@
 
 #include <array>
 #include <vector>
+#include <string>
 #include <cstdint>
 
 namespace AES
 {
 namespace encrypt
 {
-std::vector<std::uint32_t>
-AES128(const std::vector<std::uint32_t> &plaintext, const std::array<std::uint32_t, 4> &key);
+std::vector<std::uint8_t>
+AES128(const std::vector<std::uint8_t> &plaintext, const std::array<std::uint8_t, 16> &key);
 
-std::vector<std::uint32_t>
-AES192(const std::vector<std::uint32_t> &plaintext, const std::array<std::uint32_t, 6> &key);
-
-std::vector<std::uint32_t>
-AES256(const std::vector<std::uint32_t> &plaintext, const std::array<std::uint32_t, 8> &key);
+std::vector<std::uint8_t>
+AES128(const std::string &plaintext, const std::string &key);
 } // namespace encrypt
 
 namespace decrypt
 {
-std::vector<std::uint32_t>
-AES128(const std::vector<std::uint32_t> &plaintext, const std::array<std::uint32_t, 4> &key);
+std::vector<std::uint8_t>
+AES128(const std::vector<std::uint8_t> &plaintext, const std::array<std::uint8_t, 16> &key);
 
-std::vector<std::uint32_t>
-AES192(const std::vector<std::uint32_t> &plaintext, const std::array<std::uint32_t, 6> &key);
-
-std::vector<std::uint32_t>
-AES256(const std::vector<std::uint32_t> &plaintext, const std::array<std::uint32_t, 8> &key);
+std::vector<std::uint8_t>
+AES128(const std::string &plaintext, const std::string &key);
 } // namespace decrypt
 } // namespace AES
 
