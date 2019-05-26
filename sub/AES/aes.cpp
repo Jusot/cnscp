@@ -4,9 +4,14 @@
 
 using namespace std;
 
+namespace AES::_128
+{
 namespace
 {
-constexpr uint8_t RC[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
+constexpr size_t kRounds = 10;
+constexpr size_t kLength = 16;
+
+constexpr uint8_t RC[] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
 constexpr uint8_t SBOX[] =
 {
@@ -28,7 +33,7 @@ constexpr uint8_t SBOX[] =
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16,
 };
 
-constexpr uint8_t INV_SBOX[] = 
+constexpr uint8_t INV_SBOX[] =
 {
     0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
     0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
@@ -50,46 +55,47 @@ constexpr uint8_t INV_SBOX[] =
 
 inline uint8_t mul2(uint8_t v)
 {
-    return (v & 0x80) ? ((v << 1) ^ 0x1b) : (v << 1);
+    return (v & 0x80)
+         ? (v << 1) ^ 0x1b
+         : (v << 1);
 }
 
-void shiftrows128(array<uint8_t, 16> &T)
+void shift_rows(array<uint8_t, kLength> &T)
 {
-    tie(T[1],  T[5],  T[9],  T[13],
-        T[2],  T[10], T[6],  T[14],
-        T[15], T[11], T[7],  T[3]) = make_tuple
+    tie(T[ 1], T[ 5], T[9],  T[13],
+        T[ 2], T[10], T[6],  T[14],
+        T[15], T[11], T[7],  T[ 3]) = make_tuple
     (
-        T[5],  T[9],  T[13], T[1],
-        T[10], T[2],  T[14], T[6],
-        T[11], T[7],  T[3],  T[15]
+        T[ 5], T[ 9], T[13], T[ 1],
+        T[10], T[ 2], T[14], T[ 6],
+        T[11], T[ 7], T[ 3], T[15]
     );
 }
 
-void invshiftrows128(array<uint8_t, 16> &T)
+void inv_shift_rows(array<uint8_t, kLength> &T)
 {
-    tie(T[13], T[9],  T[5],  T[1],
-        T[14], T[6],  T[10], T[2],
-        T[3],  T[7],  T[11], T[15]) = make_tuple
+    tie(T[13], T[ 9], T[ 5], T[ 1],
+        T[14], T[ 6], T[10], T[ 2],
+        T[ 3], T[ 7], T[11], T[15]) = make_tuple
     (
-        T[9],  T[5],  T[1],  T[13],
-        T[6],  T[14], T[2],  T[10],
-        T[7],  T[11], T[15], T[3]
+        T[ 9], T[ 5], T[ 1], T[13],
+        T[ 6], T[14], T[ 2], T[10],
+        T[ 7], T[11], T[15], T[ 3]
     );
 }
 
-array<uint8_t, 16 * 11> gen_rK(const array<uint8_t, 16> &Key)
+array<uint8_t, kLength * (kRounds + 1)> gen_round_keys(const array<uint8_t, kLength> &key)
 {
-    array<uint8_t, 16 * 11> rK;
+    array<uint8_t, kLength * (kRounds + 1)> round_keys;
+
+    auto *round_keys_ptr = round_keys.data();
+
+    for (int i = 0; i < kLength; ++i)
+        *round_keys_ptr++ = key[i];
+
     array<uint8_t, 4> temp;
-
-    uint8_t *last4bytes,
-            *roundkeys = rK.data();
-
-    for (int i = 0; i < 16; ++i)
-        *roundkeys++ = Key[i];
-
-    last4bytes = roundkeys - 4;
-    for (int i = 0; i < 10; ++i)
+    auto last4bytes = round_keys_ptr - 4;
+    for (int i = 0; i < kRounds; ++i)
     {
         temp[3] = SBOX[*last4bytes++];
         temp[0] = SBOX[*last4bytes++];
@@ -97,38 +103,38 @@ array<uint8_t, 16 * 11> gen_rK(const array<uint8_t, 16> &Key)
         temp[2] = SBOX[*last4bytes++];
         temp[0] ^= RC[i];
 
-        auto lastround = roundkeys - 16;
+        auto last_round_key_ptr = round_keys_ptr - kLength;
 
         for (auto t : temp)
-            *roundkeys++ = t ^ *lastround++;
+            *round_keys_ptr++ = t ^ *last_round_key_ptr++;
 
-        for (int i = 0; i < 12; ++i)
-            *roundkeys++ = *last4bytes++ ^ *lastround++;
+        for (int j = 0; j < kLength - temp.size(); ++j)
+            *round_keys_ptr++ = *last4bytes++ ^ *last_round_key_ptr++;
     }
 
-    return rK;
+    return round_keys;
 }
 
-array<uint8_t, 16> aesencrypt128(array<uint8_t, 16> P, const array<uint8_t, 16> &Key)
+array<uint8_t, kLength>
+encrypt_block(array<uint8_t, kLength> P, const array<uint8_t, kLength> &Key)
 {
-    auto K = gen_rK(Key);
+
+    auto K = gen_round_keys(Key);
     auto key = K.data();
 
-    for (int i = 0; i < 16; ++i)
-    {
+    for (size_t i = 0; i < kLength; ++i)
         P[i] ^= *key++;
-    }
 
-    for (int j = 0; j < 9; ++j)
+    for (size_t j = 1; j < kRounds; ++j)
     {
-        array<uint8_t, 16> T;
+        array<uint8_t, kLength> T;
 
-        for (int i = 0; i < 16; ++i)
+        for (int i = 0; i < kLength; ++i)
             T[i] = SBOX[P[i]];
-        
-        shiftrows128(T);
 
-        for (int i = 0; i < 16; i += 4)
+        shift_rows(T);
+
+        for (int i = 0; i < kLength; i += 4)
         {
             uint8_t t = T[i] ^ T[i + 1] ^ T[i + 2] ^ T[i + 3];
             P[i    ] = mul2(T[i    ] ^ T[i + 1]) ^ T[i    ] ^ t;
@@ -137,83 +143,88 @@ array<uint8_t, 16> aesencrypt128(array<uint8_t, 16> P, const array<uint8_t, 16> 
             P[i + 3] = mul2(T[i + 3] ^ T[i    ]) ^ T[i + 3] ^ t;
         }
 
-        for (int i = 0; i < 16; ++i)
+        for (int i = 0; i < kLength; ++i)
             P[i] ^= *key++;
     }
 
-    for (int i = 0; i < 16; ++i)
+    for (int i = 0; i < kLength; ++i)
         P[i] = SBOX[P[i]];
-    shiftrows128(P);
-    for (int i = 0; i < 16; ++i)
+
+    shift_rows(P);
+
+    for (int i = 0; i < kLength; ++i)
         P[i] ^= *key++;
-    
+
     return P;
 }
 
-array<uint8_t, 16> aesdecrypt128(array<uint8_t, 16> P, const array<uint8_t, 16> &Key)
+array<uint8_t, kLength>
+decrypt_block(array<uint8_t, kLength> C, const array<uint8_t, kLength> &key)
 {
-    auto K = gen_rK(Key);
-    auto key = K.data() + 160;
+    auto round_keys = gen_round_keys(key);
+    auto round_keys_ptr = round_keys.data() + 160;
 
-    for (int i = 0; i < 16; ++i)
-        P[i] ^= key[i];
-    invshiftrows128(P);
-    for (int i = 0; i < 16; ++i)
-        P[i] = INV_SBOX[P[i]];
+    for (int i = 0; i < kLength; ++i)
+        C[i] ^= round_keys_ptr[i];
 
-    key -= 16;
-    for (int j = 0; j < 9; ++j, key -= 16)
+    inv_shift_rows(C);
+
+    for (int i = 0; i < kLength; ++i)
+        C[i] = INV_SBOX[C[i]];
+
+    round_keys_ptr -= kLength;
+    for (int j = 1; j < kRounds; ++j, round_keys_ptr -= 16)
     {
-        array<uint8_t, 16> T;
+        array<uint8_t, kLength> T;
 
-        for (int i = 0; i < 16; ++i)
-            T[i] = P[i] ^ key[i];
+        for (int i = 0; i < kLength; ++i)
+            T[i] = C[i] ^ round_keys_ptr[i];
 
-        for (int i = 0; i < 16; i += 4)
+        for (int i = 0; i < kLength; i += 4)
         {
             uint8_t t = T[i] ^ T[i + 1] ^ T[i + 2] ^ T[i + 3], u, v;
-            P[i    ] = mul2(T[i    ] ^ T[i + 1]) ^ T[i    ] ^ t;
-            P[i + 1] = mul2(T[i + 1] ^ T[i + 2]) ^ T[i + 1] ^ t;
-            P[i + 2] = mul2(T[i + 2] ^ T[i + 3]) ^ T[i + 2] ^ t;
-            P[i + 3] = mul2(T[i + 3] ^ T[i    ]) ^ T[i + 3] ^ t;
+            C[i    ] = mul2(T[i    ] ^ T[i + 1]) ^ T[i    ] ^ t;
+            C[i + 1] = mul2(T[i + 1] ^ T[i + 2]) ^ T[i + 1] ^ t;
+            C[i + 2] = mul2(T[i + 2] ^ T[i + 3]) ^ T[i + 2] ^ t;
+            C[i + 3] = mul2(T[i + 3] ^ T[i    ]) ^ T[i + 3] ^ t;
             u = mul2(mul2(T[i] ^ T[i + 2]));
             v = mul2(mul2(T[i + 1] ^ T[i + 3]));
             t = mul2(u ^ v);
-            P[i    ] ^= t ^ u;
-            P[i + 1] ^= t ^ v;
-            P[i + 2] ^= t ^ u;
-            P[i + 3] ^= t ^ v;
+            C[i    ] ^= t ^ u;
+            C[i + 1] ^= t ^ v;
+            C[i + 2] ^= t ^ u;
+            C[i + 3] ^= t ^ v;
         }
 
-        invshiftrows128(P);
+        inv_shift_rows(C);
 
-        for (int i = 0; i < 16; ++i)
-            P[i] = INV_SBOX[P[i]];
+        for (int i = 0; i < kLength; ++i)
+            C[i] = INV_SBOX[C[i]];
     }
 
-    for (int i = 0; i < 16; ++i)
-        P[i] ^= key[i];
-    
-    return P;
+    for (int i = 0; i < kLength; ++i)
+        C[i] ^= round_keys_ptr[i];
+
+    return C;
 }
 } // namespace
 
-// AES 128
 vector<uint8_t>
-AES::encrypt::AES128(const vector<uint8_t> &plaintext, const array<uint8_t, 16> &key)
+encrypt(const vector<uint8_t> &plaintext, const array<uint8_t, 16> &key)
 {
     vector<uint8_t> result;
 
     vector<uint8_t> raw = plaintext;
-    while (raw.size() % 16 != 0)
+    while (raw.size() % kLength != 0)
         raw.push_back(0);
-    
-    for (size_t i = 0; i < raw.size(); i += 16)
+
+    for (size_t i = 0; i < raw.size(); i += kLength)
     {
-        array<uint8_t, 16> group;
-        for (size_t j = 0; j < 16; ++j)
+        array<uint8_t, kLength> group;
+        for (size_t j = 0; j < kLength; ++j)
             group[j] = raw[i + j];
-        auto gres = aesencrypt128(group, key);
+
+        auto gres = encrypt_block(group, key);
         result.insert(result.end(), gres.begin(), gres.end());
     }
 
@@ -221,40 +232,42 @@ AES::encrypt::AES128(const vector<uint8_t> &plaintext, const array<uint8_t, 16> 
 }
 
 vector<uint8_t>
-AES::decrypt::AES128(const vector<uint8_t> &plaintext, const array<uint8_t, 16> &key)
+decrypt(const vector<uint8_t> &encrypted_text, const array<uint8_t, 16> &key)
 {
     vector<uint8_t> result;
 
-    vector<uint8_t> raw = plaintext;
-    while (raw.size() % 16 != 0)
+    vector<uint8_t> raw = encrypted_text;
+    while (raw.size() % kLength != 0)
         raw.push_back(0);
-    
-    for (size_t i = 0; i < raw.size(); i += 16)
+
+    for (size_t i = 0; i < raw.size(); i += kLength)
     {
-        array<uint8_t, 16> group;
-        for (size_t j = 0; j < 16; ++j)
+        array<uint8_t, kLength> group;
+        for (size_t j = 0; j < kLength; ++j)
             group[j] = raw[i + j];
-        auto gres = aesdecrypt128(group, key);
+
+        auto gres = decrypt_block(group, key);
         result.insert(result.end(), gres.begin(), gres.end());
     }
 
     return result;
 }
 
-string AES::encrypt::AES128(const string &plaintext, std::string key)
+string encrypt(const string &plaintext, std::string key)
 {
-    array<uint8_t, 16> k;
-    for (size_t i = 0; i < 16; ++i)
+    array<uint8_t, kLength> k;
+    for (size_t i = 0; i < kLength; ++i)
         k[i] = i < key.size() ? key[i] : 0;
-    auto C = encrypt::AES128(vector<uint8_t>(plaintext.begin(), plaintext.end()), k);
+    auto C = encrypt(vector<uint8_t>(plaintext.begin(), plaintext.end()), k);
     return string(C.begin(), C.end());
 }
 
-string AES::decrypt::AES128(const string &plaintext, std::string key)
+string decrypt(const string &encrypted_text, std::string key)
 {
-    array<uint8_t, 16> k;
-    for (size_t i = 0; i < 16; ++i)
+    array<uint8_t, kLength> k;
+    for (size_t i = 0; i < kLength; ++i)
         k[i] = i < key.size() ? key[i] : 0;
-    auto M = decrypt::AES128(vector<uint8_t>(plaintext.begin(), plaintext.end()), k);
+    auto M = decrypt(vector<uint8_t>(encrypted_text.begin(), encrypted_text.end()), k);
     return string(M.begin(), M.end());
 }
+} // namespace AES::_128

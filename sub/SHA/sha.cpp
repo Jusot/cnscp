@@ -30,7 +30,7 @@ padding_and_append_len(vector<uint8_t> input)
     {
         input.push_back(0);
     }
-    
+
     // step 2
     uint64_t tail = len;
     for (int i = 56; i >= 0; i -= 8)
