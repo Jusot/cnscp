@@ -9,7 +9,7 @@ int main()
 {
     string raw = "我喜欢罗钥轩,要多喜欢有多喜欢", key = "超级喜欢";
     auto c = des(raw, key);
-    auto m = des(c, key, true);
+    auto m = des(c, key, false);
 
     cout << raw << endl;
     cout << key << endl;
