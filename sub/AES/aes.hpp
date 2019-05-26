@@ -1,3 +1,6 @@
+#ifndef AES_HPP
+#define AES_HPP
+
 #include <array>
 #include <vector>
 #include <cstdint>
@@ -28,3 +31,5 @@ std::vector<std::uint32_t>
 AES256(const std::vector<std::uint32_t> &plaintext, const std::array<std::uint32_t, 8> &key);
 } // namespace decrypt
 } // namespace AES
+
+#endif // AES_HPP

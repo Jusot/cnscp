@@ -1,3 +1,6 @@
+#ifndef RC4_HPP
+#define RC4_HPP
+
 #include <vector>
 #include <string>
 
@@ -19,3 +22,5 @@ private:
 	char *T_;
 };
 } // namespace RC4
+
+#endif // RC4_HPP
