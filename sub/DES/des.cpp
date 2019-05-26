@@ -154,8 +154,7 @@ string bits2str(const array<bool, 64> &bits)
 array<bool, 48> extend(array<bool, 32> input)
 {
     array<bool, 48> result;
-    for (size_t i = 0; i < 48; ++i)
-        result[i] = input[expa_perm[i] - 1];
+    for (size_t i = 0; i < 48; ++i) result[i] = input[expa_perm[i] - 1];
     return result;
 }
 
@@ -177,8 +176,7 @@ array<bool, 32> sbox_proc(array<bool, 48> input)
         col[3] = input[i * 6 + 1];
 
         bitset<4> temp(sbox[i][row.to_ulong() * 16 + col.to_ulong()]);
-        for (size_t j = 0; j < 4; ++j)
-            result[i * 4 + 3 - j] = temp[j];
+        for (size_t j = 0; j < 4; ++j) result[i * 4 + 3 - j] = temp[j];
     }
 
     return result;
@@ -187,16 +185,14 @@ array<bool, 32> sbox_proc(array<bool, 48> input)
 array<bool, 32> pbox_proc(array<bool, 32> input)
 {
     array<bool, 32> res;
-    for (size_t i = 0; i < 32; ++i)
-        res[i] = input[p_table[i] - 1];
+    for (size_t i = 0; i < 32; ++i) res[i] = input[p_table[i] - 1];
     return res;
 }
 
 array<bool, 64> ipr_proc(array<bool, 64> input)
 {
     array<bool, 64> res;
-    for (size_t i = 0; i < 64; ++i)
-        res[i] = input[ipr_table[i] - 1];
+    for (size_t i = 0; i < 64; ++i) res[i] = input[ipr_table[i] - 1];
     return res;
 }
 
@@ -244,8 +240,7 @@ array<bool, 64> des(array<bool, 64> M, array<bool, 64> key, bool encrypt = true)
     array<bool, 56> K;
     array<array<bool, 32>, 17> L, R;
 
-    for (size_t i = 0; i < 64; ++i)
-        T[i] = M[ip_table[i] - 1];
+    for (size_t i = 0; i < 64; ++i) T[i] = M[ip_table[i] - 1];
 
     for (int i = 0; i < 32; i++)
     {
@@ -253,23 +248,15 @@ array<bool, 64> des(array<bool, 64> M, array<bool, 64> key, bool encrypt = true)
         R[0][i] = T[i + 32];
     }
 
-    for (size_t i = 0; i < 56; ++i)
-        K[i] = key[key_table[i] - 1];
+    for (size_t i = 0; i < 56; ++i) K[i] = key[key_table[i] - 1];
 
     auto keys = gen_keys(K);
-    if (!encrypt)
-    {
-        for (int i = 1; i < 9; ++i)
-        {
-            swap(keys[i], keys[17 - i]);
-        }
-    }
+    if (!encrypt) for (int i = 1; i < 9; ++i) swap(keys[i], keys[17 - i]);
 
     for (int j = 1; j < 17; j++)
     {
         auto t1 = encrypt ? extend(R[j - 1]) : extend(L[j - 1]);
-        for (size_t i = 0; i < 48; ++i)
-            t1[i] = t1[i] ^ keys[j][i];
+        for (size_t i = 0; i < 48; ++i) t1[i] = t1[i] ^ keys[j][i];
         auto t2 = pbox_proc(sbox_proc(t1));
         for (size_t i = 0; i < 32; ++i)
         {
@@ -301,9 +288,7 @@ string des(string M, std::string key, bool encrypt = true)
 
     auto k = str2bits(key);
 
-    while (M.size() % 8 != 0)
-        M.push_back(0);
-
+    while (M.size() % 8 != 0) M.push_back(0);
     for (size_t i = 0; i < M.size(); i += 8)
     {
         auto group = M.substr(i, 8);
