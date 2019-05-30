@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <cstdlib>
+#include <algorithm>
 
 #include "rsa.hpp"
 
@@ -123,5 +124,15 @@ uint64_t choose_d(uint64_t p, uint64_t q, uint64_t e)
     }
 
     return d;
+}
+
+tuple<uint64_t, uint64_t, uint64_t> gen_ned(uint64_t prime_size, string key)
+{
+    uint64_t p = random_prime(key, prime_size);
+    reverse(key.begin(), key.end());
+    uint64_t q = random_prime(key, prime_size);
+    uint64_t n = p * q;
+    uint64_t e = choose_emax(p, q);
+    uint64_t d = choose_d(p, q, e);
 }
 } // namespace RSA
