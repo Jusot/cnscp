@@ -143,9 +143,18 @@ sha256(const vector<uint8_t> &raw)
     return res;
 }
 
-array<uint32_t, 8>
+string
 sha256(const string &raw)
 {
-    return sha256(vector<uint8_t>(raw.begin(), raw.end()));
+    string result;
+    auto temp = sha256(vector<uint8_t>(raw.begin(), raw.end()));
+    for (auto c : temp)
+    {
+        result.push_back((c >> 24) & 0xFF);
+        result.push_back((c >> 16) & 0xFF);
+        result.push_back((c >>  8) & 0xFF);
+        result.push_back((c      ) & 0xFF);
+    }
+    return result;
 }
 } // namespace SHA

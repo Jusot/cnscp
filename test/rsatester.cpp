@@ -6,7 +6,7 @@ using namespace RSA;
 
 int main()
 {
-    uint64_t prime_size = 100000;
+    uint64_t prime_size = 100000000;
 
     uint64_t p = random_prime("bobobobobo", prime_size);
     uint64_t q = random_prime("lololololo", prime_size);

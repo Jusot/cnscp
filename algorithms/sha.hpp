@@ -11,7 +11,7 @@ namespace SHA
 std::array<uint32_t, 8>
 sha256(const std::vector<uint8_t> &raw);
 
-std::array<uint32_t, 8>
+std::string
 sha256(const std::string &raw);
 } // namespace SHA
 
