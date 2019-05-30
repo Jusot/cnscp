@@ -40,9 +40,9 @@ void SocketServer::run()
         socklen_t length;
         auto target_fd = accept(fd_, (sockaddr *)&target_addr, &length);
         if (target_fd == -1) ERRPROC;
-        std::thread t([this]
+        std::thread t([this, target_fd]
         {
-            this->callback_(this->fd_);
+            this->callback_(target_fd);
         });
         t.detach();
     }
