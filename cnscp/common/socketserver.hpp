@@ -2,6 +2,7 @@
 #define COMMON_SOCKETSERVER_HPP
 
 #include <string>
+#include <functional>
 #include <netinet/in.h>
 
 namespace cnscp
@@ -9,18 +10,17 @@ namespace cnscp
 class SocketServer
 {
   public:
-    SocketServer(int port);
+    using Callback = std::function<void(int)>;
+
+    SocketServer(int port, Callback cb);
     ~SocketServer();
 
-    void listen();
     void run();
 
   private:
     int fd_;
     sockaddr_in addr_;
-
-    void send(const std::string &data);
-    std::string recv();
+    Callback callback_;
 };
 } // namespace cnscp
 

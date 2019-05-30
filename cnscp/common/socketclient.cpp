@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
+#include "socketfuncs.hpp"
 #include "socketclient.hpp"
 
 #define ERRPROC abort()
@@ -33,12 +34,10 @@ SocketClient::~SocketClient()
 
 void SocketClient::send(const string &data)
 {
-    write(fd_, data.c_str, data.size() + 1);
+    socketfuncs::send(fd_, data);
 }
 
 string SocketClient::recv()
 {
-    char buf[4096] = { 0 };
-    read(fd_, buf, 4096);
-    return buf;
+    return socketfuncs::recv(fd_);
 }
