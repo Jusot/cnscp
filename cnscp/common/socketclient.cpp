@@ -17,12 +17,12 @@ SocketClient::SocketClient(const string &address, int port)
     auto host = gethostbyname(address.c_str());
     if (host == nullptr) ERRPROC;
 
-    bzero(&addr, sizeof addr);
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr = *((in_addr *)host->h_addr);
+    bzero(&addr_, sizeof addr_);
+    addr_.sin_family = AF_INET;
+    addr_.sin_port = htons(port);
+    addr_.sin_addr = *((in_addr *)host->h_addr);
 
-    auto err = connect(fd_, (sockaddr *)&addr, sizeof(sockaddr));
+    auto err = connect(fd_, (sockaddr *)&addr_, sizeof(sockaddr));
     if (err) ERRPROC;
 }
 

@@ -17,7 +17,7 @@ class SocketClient
 
   private:
     int fd_;
-    sockaddr_in addr;
+    sockaddr_in addr_;
 };
 } // namespace cnscp
 
