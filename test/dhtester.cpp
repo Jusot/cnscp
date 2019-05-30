@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "dh.cpp"
+#include "../algorithms/dh.cpp"
 
 using namespace DH;
 

@@ -1,5 +1,5 @@
-#ifndef COMMON_SOCKETFUNCS_HPP
-#define COMMON_SOCKETFUNCS_HPP
+#ifndef COMMON_SOCKETCLIENT_HPP
+#define COMMON_SOCKETCLIENT_HPP
 
 #include <string>
 #include <netinet/in.h>
@@ -21,4 +21,4 @@ class SocketClient
 };
 } // namespace cnscp
 
-#endif
+#endif // COMMON_SOCKETCLIENT_HPP

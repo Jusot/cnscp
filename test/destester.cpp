@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "des.cpp"
+#include "../algorithms/des.cpp"
 
 using namespace std;
 using namespace DES;

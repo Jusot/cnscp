@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "sha.cpp"
+#include "../algorithms/sha.cpp"
 
 #define TEST(str) cout << str << endl; for (auto i : sha256(str)) cout << hex << i; cout << endl;
 

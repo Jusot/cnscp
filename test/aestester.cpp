@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "aes.cpp"
+#include "../algorithms/aes.cpp"
 
 using namespace std;
 namespace AES128 = AES::_128;
