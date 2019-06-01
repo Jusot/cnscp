@@ -33,7 +33,7 @@ string gen_info(const string &PI, const string &OI, uint64_t KRc[], uint64_t KUc
 
     string PIMD, OIMD, POMD, DS;
 
-    PIMD = SHA::sha256(PI); 
+    PIMD = SHA::sha256(PI);
     OIMD = SHA::sha256(OI);
     POMD = SHA::sha256(PIMD + OIMD);
     {
@@ -55,16 +55,21 @@ string gen_info(const string &PI, const string &OI, uint64_t KRc[], uint64_t KUc
         auto p = reinterpret_cast<char *>(KUc);
         for (int i = 0; i < 8; ++i) result.push_back(*p++);
     }
-    
+
     return result;
 }
 
 int main(int argc, char *argv[])
 {
+    cout << "Client Start..." << endl;
+
+    cout << "KRc KUc Init..." << endl;
     // int KRc KUc
     auto [n, e, d] = RSA::gen_ned(1000000);
     uint64_t KRc[]{n, e}, KUc[]{n, d}, KUb[2];
+    cout << "[KRc KUc] [n, e, d] [" << n << ", " << e << ", " << d << "]" << endl;
 
+    cout << "Receive KUb..." << endl;
     // receive KUb
     {
         SocketClient sc("127.0.0.1", 8888);
@@ -73,6 +78,7 @@ int main(int argc, char *argv[])
         auto p = reinterpret_cast<uint64_t *>(res.data());
         for (int i = 0; i < 2; ++i) KUb[i++] = *p++;
     }
+    cout << "[KUb] [" << KUb[0] << ", " << KUb[1] << "]" << endl;
 
     SocketClient sc("127.0.0.1", 7777);
     while (true)
