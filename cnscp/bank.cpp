@@ -10,7 +10,7 @@ using namespace cnscp;
 namespace sf = socketfuncs;
 
 /*
-ROLE B
+ROLE Bank
 
 KRb, KUb : RSA
 */

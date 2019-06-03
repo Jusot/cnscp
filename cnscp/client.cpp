@@ -15,7 +15,7 @@ using namespace std;
 using namespace cnscp;
 
 /*
-ROLE C
+ROLE Client
 
 KUb, KRc, KUc : RSA
 Ks            : AES
@@ -24,7 +24,8 @@ Ks            : AES
 PIMD = SHA(PI)
 OIMD = SHA(OI)
 DS = E(KRc, SHA(PIMD | OIMD))
-E(Ks, PI | DS | OIMD) | E(KUb, Ks) | PIMD | OI | DS | KUc
+
+SEND : E(Ks, PI | DS | OIMD) | E(KUb, Ks) | PIMD | OI | DS | KUc
 */
 
 string Ks(16, 0);
