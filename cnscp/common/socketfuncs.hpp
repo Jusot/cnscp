@@ -11,14 +11,14 @@ namespace socketfuncs
 {
 inline void send(int fd, const std::string &data)
 {
-    write(fd, data.c_str(), data.size() + 1);
+    write(fd, data.c_str(), data.size());
 }
 
 inline std::string recv(int fd)
 {
-    char buf[4096] = { 0 };
-    read(fd, buf, 4096);
-    return buf;
+    string res(4096, 0);
+    read(fd, res.data(), 4096);
+    return res;
 }
 } // namespace socketfuncs
 } // namespace cnscp
