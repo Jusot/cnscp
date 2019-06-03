@@ -7,9 +7,10 @@ using namespace cnscp;
 namespace sf = socketfuncs;
 
 /*
-ROLE Merchant
+Role Merchant
 
-
+Receive :
+Send :
 */
 
 int main(int argc, char *argv[])

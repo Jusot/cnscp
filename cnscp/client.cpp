@@ -15,7 +15,7 @@ using namespace std;
 using namespace cnscp;
 
 /*
-ROLE Client
+Role Client
 
 KUb, KRc, KUc : RSA
 Ks            : AES
