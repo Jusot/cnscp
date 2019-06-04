@@ -15,8 +15,8 @@ Role Merchant
 
 Only receive from Client
 
-Receive : | (Length)kPILen + 416 | PIMD | OI | DS | KUc
-Send    : | (Length)kPILen + 416 |
+Receive from Client : | (Length)kPILen + 416 | PIMD | OI | DS | KUc
+Send    to   Bank   : | (Length)kPILen + 416 |
 */
 
 void process(int fd);

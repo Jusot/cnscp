@@ -23,7 +23,7 @@ Ks            : AES
 
 PIMD = SHA(PI)
 OIMD = SHA(OI)
-DS = E(KRc, SHA(PIMD | OIMD))
+DS   = E(KRc, SHA(PIMD | OIMD))
 
 SEND : E(Ks, PI | DS | OIMD) | E(KUb, Ks) | PIMD | OI | DS | KUc
 */
