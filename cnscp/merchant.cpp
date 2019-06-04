@@ -50,6 +50,10 @@ tuple<bool, string> check_data(const string &data)
         for (int i = 0; i < 2; ++i) KUc[i] = *p++;
     }
 
+    {
+        cout << "[KUc] [" << KUc[0] << ", " << KUc[1] << "]" << endl;
+    }
+
     auto OIMD = SHA::sha256(OI);
     auto POMD = SHA::sha256(PIMD + OIMD);
     string POMD_recv;
@@ -60,14 +64,14 @@ tuple<bool, string> check_data(const string &data)
     }
 
     {
-        log("PIMD: ");
-        for (auto c : PIMD) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
-        log("OIMD: ");
-        for (auto c : OIMD) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
         log("POMD: ");
         for (auto c : POMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("DS_recv: ");
+        for (auto c : DS) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("POMD_recv: ");
+        for (auto c : POMD_recv) cout << hex << (unsigned int)(unsigned char)c;
         cout << endl;
     }
 
@@ -78,20 +82,15 @@ tuple<bool, string> check_data(const string &data)
 void process(int fd)
 {
     auto data = sf::recv(fd);
-    SocketClient sc("127.0.0.1", kBankPort);
 
     auto d4b = data.substr(0, kPILen + 416),
          d4m = data.substr(kPILen + 416, kOILen + 304);
 
-    {
-        log("recv data: ");
-        for (auto c : data) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
-    }
-
     auto [matched, DS] = check_data(d4m);
     if (matched)
     {
+        SocketClient sc("127.0.0.1", kBankPort);
+
         sc.send(d4b + d4m.substr(kOILen + 288, 16) + DS);
         auto res = sc.recv();
         if (res.substr(0, 7) == "SUCCESS") log("DS is same to Bank's");

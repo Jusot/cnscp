@@ -17,7 +17,7 @@ Role Bank
 
 KRb, KUb : RSA
 
-Receive : E(Ks, PI | DS | OIMD) | E(KUb, Ks) | KUc | DS
+Receive : E(Ks, PI | DS | OIMD) | E(KUb, Ks) | DS | KUc
 */
 
 uint64_t KRb[2], KUb[2];

@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
     }
     cout << "[KUb] [" << KUb[0] << ", " << KUb[1] << "]" << endl;
 
-    SocketClient sc("127.0.0.1", kMerchantPort);
-    log("Socket Client connecting to Merchant Successfully");
     while (true)
     {
+        SocketClient sc("127.0.0.1", kMerchantPort);
+
         string PI, OI;
         cin >> PI >> OI;
         auto data = gen_info(PI, OI, KRc, KUc, KUb);
@@ -92,8 +92,31 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
     POMD = SHA::sha256(PIMD + OIMD);
     {
         assert(POMD.size() == 32);
-        auto DS_tmp = RSA::crypt(KRc[0], KRc[1], vector<uint64_t>(POMD.begin(), POMD.end()));
+        vector<uint64_t> DS_tmp;
+        for (auto c : POMD) DS_tmp.push_back(c & 0xFF);
+
+        {
+            log("DS_tmp raw: ");
+            for (auto c : DS_tmp) cout << hex << c;
+            cout << endl;
+        }
+
+        DS_tmp = RSA::crypt(
+            KRc[0], KRc[1],
+            DS_tmp
+        );
         DS.insert(DS.end(), (char *)DS_tmp.data(), (char *)(DS_tmp.data() + DS_tmp.size()));
+
+        {
+            log("DS_tmp encrypted: ");
+            for (auto c : DS_tmp) cout << hex << c;
+            cout << endl;
+
+            DS_tmp = RSA::crypt(KUc[0], KUc[1], DS_tmp);
+            log("DS_tmp decrypted: ");
+            for (auto c : DS_tmp) cout << hex << c;
+            cout << endl;
+        }
     }
 
     result += AES::_128::encrypt(PI + DS + OIMD, Ks);
