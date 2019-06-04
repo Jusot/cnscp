@@ -105,13 +105,13 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
     result += PIMD + OI + DS;
     {
         auto p = reinterpret_cast<char *>(KUc);
-        for (int i = 0; i < 8; ++i) result.push_back(*p++);
+        for (int i = 0; i < 16; ++i) result.push_back(*p++);
     }
 
-    //                kPILen | 32*8 | 32    | 8    * 16  | 32   | kOILen | 32*8 | 8
+    //                kPILen | 32*8 | 32    | 8    * 16  | 32   | kOILen | 32*8 | 16
     // result = E(Ks, PI     | DS   | OIMD) | E(KUb, Ks) | PIMD | OI     | DS   | KUc
-    // assert(result.size == (kPILen + 32 * 8 + 32 + 16 * 8 + 32 + kOILen + 32 * 8 + 8 ));
-    assert(result.size() == kPILen + kOILen + 712);
+    // assert(result.size == (kPILen + 32 * 8 + 32 + 16 * 8 + 32 + kOILen + 32 * 8 + 16 ));
+    assert(result.size() == kPILen + kOILen + 720);
 
     return result;
 }

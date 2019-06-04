@@ -21,7 +21,7 @@ Role Merchant
 Only receive from Client
 
 Receive from Client : | (Length)kPILen + 416 | PIMD | OI | DS | KUc
-Send    to   Bank   : | (Length)kPILen + 416 | DS
+Send    to   Bank   : | (Length)kPILen + 416 | KUc | DS
 */
 
 void process(int fd);
@@ -45,7 +45,7 @@ tuple<bool, string> check_data(const string &data)
          DS   = data.substr(kOILen + 32, 256);
     uint64_t KUc[2];
     {
-        auto temp = data.substr(kOILen + 288, 8);
+        auto temp = data.substr(kOILen + 288, 16);
         auto p = reinterpret_cast<uint64_t *>(temp.data());
         for (int i = 0; i < 2; ++i) KUc[i++] = *p++;
     }
@@ -88,7 +88,7 @@ void process(int fd)
     auto [matched, DS] = check_data(d4m);
     if (matched)
     {
-        sc.send(d4b + DS);
+        sc.send(d4b + d4m.substr(kOILen + 288, 16) + DS);
         auto res = sc.recv();
         if (res.substr(0, 7) == "SUCCESS") log("DS is same to Bank's");
         else log("DS is different from Bank's");

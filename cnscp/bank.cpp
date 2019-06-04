@@ -3,6 +3,8 @@
 
 #include "general.hpp"
 #include "../algorithms/rsa.hpp"
+#include "../algorithms/sha.hpp"
+#include "../algorithms/aes.hpp"
 #include "common/socketfuncs.hpp"
 #include "common/socketserver.hpp"
 
@@ -15,7 +17,7 @@ Role Bank
 
 KRb, KUb : RSA
 
-Receive : E(Ks, PI | DS | OIMD) | E(KUb, Ks) | DS
+Receive : E(Ks, PI | DS | OIMD) | E(KUb, Ks) | KUc | DS
 */
 
 uint64_t KRb[2], KUb[2];
@@ -43,7 +45,66 @@ int main(int argc, char *argv[])
 
 tuple<bool, string> check_data(const string &data)
 {
-    // TODO: check
+    auto encrypted_PI_DS_OIMD = data.substr(0, kPILen + 288),
+         encrypted_Ks = data.substr(kPILen + 288, 128);
+    uint64_t KUc[2];
+    {
+        auto temp = data.substr(kPILen + 416, 16);
+        auto p = reinterpret_cast<uint64_t *>(temp.data());
+        for (int i = 0; i < 2; ++i) KUc[i++] = *p++;
+    }
+
+    string Ks;
+    {
+        vector<uint64_t> temp;
+        for (int i = 0; i < 16; ++i)
+        {
+            temp.push_back
+            (
+                (encrypted_Ks[i * 8 + 0] << 56) |
+                (encrypted_Ks[i * 8 + 1] << 48) |
+                (encrypted_Ks[i * 8 + 2] << 40) |
+                (encrypted_Ks[i * 8 + 3] << 32) |
+                (encrypted_Ks[i * 8 + 4] << 24) |
+                (encrypted_Ks[i * 8 + 5] << 16) |
+                (encrypted_Ks[i * 8 + 6] <<  8) |
+                (encrypted_Ks[i * 8 + 7])
+            );
+        }
+        temp = RSA::crypt(KRb[0], KRb[1], temp);
+        for (auto t : temp) Ks.push_back(t & 0xFF);
+    }
+
+    auto PI_DS_OIMD = AES::_128::decrypt(encrypted_PI_DS_OIMD, Ks);
+    auto PI   = PI_DS_OIMD.substr(0, kPILen),
+         DS   = PI_DS_OIMD.substr(kPILen, 256),
+         OIMD = PI_DS_OIMD.substr(kPILen + 256, 32);
+
+    auto PIMD = SHA::sha256(PI);
+    auto POMD = SHA::sha256(PIMD + OIMD);
+    string POMD_recv;
+    {
+        vector<uint64_t> temp;
+        for (int i = 0; i < 32; ++i)
+        {
+            temp.push_back
+            (
+                (DS[i * 8 + 0] << 56) |
+                (DS[i * 8 + 1] << 48) |
+                (DS[i * 8 + 2] << 40) |
+                (DS[i * 8 + 3] << 32) |
+                (DS[i * 8 + 4] << 24) |
+                (DS[i * 8 + 5] << 16) |
+                (DS[i * 8 + 6] <<  8) |
+                (DS[i * 8 + 7])
+            );
+        }
+        temp = RSA::crypt(KUc[0], KUc[1], temp);
+        for (auto t : temp) POMD_recv.push_back(t & 0xFF);
+    }
+
+    if (POMD == POMD_recv) return make_tuple(true, DS);
+    else return make_tuple(false, DS);
 }
 
 void process(int fd)
@@ -56,11 +117,11 @@ void process(int fd)
     }
     else
     {
-        auto raw = data.substr(0, kPILen + 416);
-        auto DS_from_merchant = data.substr(kPILen + 416);
+        auto raw = data.substr(0, kPILen + 432);
+        auto DS_recv = data.substr(kPILen + 432, 256);
 
         auto [matched, DS] = check_data(raw);
-        if (matched && DS == DS_from_merchant)
+        if (matched && DS == DS_recv)
         {
             log("DS is matched!");
             sf::send(fd, "SUCCESS");
