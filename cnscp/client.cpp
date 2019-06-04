@@ -5,7 +5,7 @@
 #include <utility>
 #include <iostream>
 
-#include "constant.hpp"
+#include "general.hpp"
 #include "../algorithms/aes.hpp"
 #include "../algorithms/rsa.hpp"
 #include "../algorithms/sha.hpp"
@@ -39,15 +39,15 @@ int main(int argc, char *argv[])
         for (auto c : "cnscp") *p++ = c;
     }
 
-    cout << "Client Start..." << endl;
+    log("Client Start...");
 
-    cout << "KRc KUc Init..." << endl;
+    log("KRc KUc Init...");
     // int KRc KUc
     auto [n, e, d] = RSA::gen_ned(kRSAKeyMax);
     uint64_t KRc[]{n, e}, KUc[]{n, d}, KUb[2];
     cout << "[KRc KUc] [n, e, d] [" << n << ", " << e << ", " << d << "]" << endl;
 
-    cout << "Receive KUb..." << endl;
+    log("Receive KUb...");
     // receive KUb
     {
         SocketClient sc("127.0.0.1", kBankPort);

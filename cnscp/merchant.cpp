@@ -1,7 +1,7 @@
 #include <tuple>
 #include <iostream>
 
-#include "constant.hpp"
+#include "general.hpp"
 #include "common/socketfuncs.hpp"
 #include "common/socketclient.hpp"
 #include "common/socketserver.hpp"
@@ -23,11 +23,11 @@ void process(int fd);
 
 int main(int argc, char *argv[])
 {
-    cout << "Merchant Start..." << endl;
+    log("Merchant Start...");
 
-    cout << "Merchant Server Init..." << endl;
+    log("Merchant Server Init...");
     SocketServer ss(kMerchantPort, process);
-    cout << "Merchant Server Run..." << endl;
+    log("Merchant Server Run...");
     ss.run();
 
     return 0;
