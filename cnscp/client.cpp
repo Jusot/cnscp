@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     log("KRc KUc Init...");
     // int KRc KUc
-    auto [n, e, d] = RSA::gen_ned(kRSAKeyMax);
+    auto [n, e, d] = RSA::gen_ned(kRSAPrimeMax);
     uint64_t KRc[]{n, e}, KUc[]{n, d}, KUb[2];
     cout << "[KRc KUc] [n, e, d] [" << n << ", " << e << ", " << d << "]" << endl;
 

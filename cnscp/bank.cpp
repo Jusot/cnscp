@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     log("KRb KUB Init...");
     // init KRb KUB
-    auto [n, e, d] = RSA::gen_ned(kRSAKeyMax);
+    auto [n, e, d] = RSA::gen_ned(kRSAPrimeMax);
     KRb[0] = n; KRb[1] = e;
     KUb[0] = n; KUb[1] = d;
     cout << "[KRb KUb] [n, e, d] [" << n << ", " << e << ", " << d << "]" << endl;

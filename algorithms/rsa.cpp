@@ -12,7 +12,7 @@ namespace
 {
 uint64_t gcd(uint64_t a, uint64_t b)
 {
-    return b > 0 ? gcd(b, a % b) : a;
+    return b == 0 ? a : gcd(b, a % b);
 }
 } // namespace
 
@@ -66,7 +66,7 @@ uint64_t random_prime(string key, uint64_t size)
             if (count == 1000) break;
             i++;
         }
-        if (count == 1000) break;
+        if (count >= min((uint64_t)1000, size)) break;
     }
 
     return k;
@@ -107,8 +107,8 @@ uint64_t choose_emax(uint64_t p, uint64_t q)
 {
     uint64_t x = (p - 1) * (q - 1), e;
 
-    for (e = x - 1;
-         e > x - 100 && gcd(e, x) != 1;
+    for (e = x - 10;
+         e > 0 && gcd(e, x) != 1;
          e--);
 
     return e;
@@ -120,7 +120,7 @@ uint64_t choose_d(uint64_t p, uint64_t q, uint64_t e)
 
     for (d = x - 1; d > 0; d--)
     {
-        if ((e * d) % x == 1) break;
+        if (((e * d) % x) == 1 && d != e) break;
     }
 
     return d;
