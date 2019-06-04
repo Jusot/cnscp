@@ -51,6 +51,14 @@ void process(int fd)
     {
         sc.send(d4m);
         auto DS_from_bank = sc.recv();
+        if (DS_from_bank == DS)
+        {
+
+        }
+        else
+        {
+            // TODO: process when DSs is not matched
+        }
     }
     else
     {

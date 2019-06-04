@@ -1,3 +1,4 @@
+#include <tuple>
 #include <iostream>
 
 #include "constant.hpp"
@@ -40,6 +41,11 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+tuple<bool, string> check_data(const string &data)
+{
+    // TODO: check
+}
+
 void process(int fd)
 {
     auto data = sf::recv(fd);
@@ -50,6 +56,16 @@ void process(int fd)
     }
     else
     {
-        // ...
+        auto [matched, DS] = check_data(data);
+        if (matched)
+        {
+            // TODO: print successful matched info
+
+            sf::send(fd, DS);
+        }
+        else
+        {
+            sf::send(fd, "Match Failed");
+        }
     }
 }
