@@ -58,12 +58,16 @@ int main(int argc, char *argv[])
     }
     cout << "[KUb] [" << KUb[0] << ", " << KUb[1] << "]" << endl;
 
-    SocketClient sc("127.0.0.1", kBankPort);
+    SocketClient sc("127.0.0.1", kMerchantPort);
+    log("Socket Client connecting to Merchant Successfully");
     while (true)
     {
         string PI, OI;
         cin >> PI >> OI;
         auto data = gen_info(PI, OI, KRc, KUc, KUb);
+        log("Data: ");
+        for (auto c : data) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
         sc.send(data);
     }
 
@@ -72,8 +76,9 @@ int main(int argc, char *argv[])
 
 string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t KUb[])
 {
-    string result;
+    log("Generating Data...");
 
+    string result;
     string PIMD, OIMD, POMD, DS;
 
     while (PI.size() < kPILen) PI.push_back(0);
