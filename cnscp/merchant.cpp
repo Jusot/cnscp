@@ -47,17 +47,14 @@ tuple<bool, string> check_data(const string &data)
     {
         auto temp = data.substr(kOILen + 288, 16);
         auto p = reinterpret_cast<uint64_t *>(temp.data());
-        for (int i = 0; i < 2; ++i) KUc[i++] = *p++;
+        for (int i = 0; i < 2; ++i) KUc[i] = *p++;
     }
 
     auto OIMD = SHA::sha256(OI);
     auto POMD = SHA::sha256(PIMD + OIMD);
     string POMD_recv;
     {
-        vector<uint64_t> temp;
-        auto p = reinterpret_cast<uint64_t *>(DS.data());
-        for (size_t i = 0; i < DS.size() / 8; ++i)
-            temp.push_back(*p++);
+        vector<uint64_t> temp((uint64_t *)DS.data(), (uint64_t *)(DS.data() + DS.size()));
         temp = RSA::crypt(KUc[0], KUc[1], temp);
         for (auto t : temp) POMD_recv.push_back(t & 0xFF);
     }

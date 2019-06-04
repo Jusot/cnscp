@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         sc.send("GET KUb");
         auto res = sc.recv();
         auto p = reinterpret_cast<uint64_t *>(res.data());
-        for (int i = 0; i < 2; ++i) KUb[i++] = *p++;
+        for (int i = 0; i < 2; ++i) KUb[i] = *p++;
     }
     cout << "[KUb] [" << KUb[0] << ", " << KUb[1] << "]" << endl;
 
@@ -90,23 +90,16 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
     {
         assert(POMD.size() == 32);
         auto DS_tmp = RSA::crypt(KRc[0], KRc[1], vector<uint64_t>(POMD.begin(), POMD.end()));
-        auto p = reinterpret_cast<char *>(DS_tmp.data());
-        for (size_t i = 0; i < DS_tmp.size() * 8; ++i)
-            DS.push_back(*p++);
+        DS.insert(DS.end(), (char *)DS_tmp.data(), (char *)(DS_tmp.data() + DS_tmp.size()));
     }
 
     result += AES::_128::encrypt(PI + DS + OIMD, Ks);
     {
-        auto temp = RSA::crypt(KUb[0], KUb[1], vector<uint64_t>(Ks.begin(), Ks.end()));
-        auto p = reinterpret_cast<char *>(temp.data());
-        for (size_t i = 0; i < temp.size() * 8; ++i)
-            DS.push_back(*p++);
+        auto encrypted_Ks_tmp = RSA::crypt(KUb[0], KUb[1], vector<uint64_t>(Ks.begin(), Ks.end()));
+        result.insert(result.end(), (char *)encrypted_Ks_tmp.data(), (char *)(encrypted_Ks_tmp.data() + encrypted_Ks_tmp.size()));
     }
     result += PIMD + OI + DS;
-    {
-        auto p = reinterpret_cast<char *>(KUc);
-        for (int i = 0; i < 16; ++i) result.push_back(*p++);
-    }
+    result.insert(result.end(), (char *)KUc, (char *)(KUc + 2));
 
     //                kPILen | 32*8 | 32    | 8    * 16  | 32   | kOILen | 32*8 | 16
     // result = E(Ks, PI     | DS   | OIMD) | E(KUb, Ks) | PIMD | OI     | DS   | KUc
