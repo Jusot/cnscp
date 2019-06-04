@@ -15,7 +15,7 @@ Role Bank
 
 KRb, KUb : RSA
 
-Receive : E(Ks, PI | DS | OIMD) | E(KUb, Ks)
+Receive : E(Ks, PI | DS | OIMD) | E(KUb, Ks) | DS
 */
 
 uint64_t KRb[2], KUb[2];
@@ -56,16 +56,19 @@ void process(int fd)
     }
     else
     {
-        auto [matched, DS] = check_data(data);
-        if (matched)
-        {
-            // TODO: print successful matched info
+        auto raw = data.substr(0, kPILen + 416);
+        auto DS_from_merchant = data.substr(kPILen + 416);
 
-            sf::send(fd, DS);
+        auto [matched, DS] = check_data(raw);
+        if (matched && DS == DS_from_merchant)
+        {
+            log("DS is matched!");
+            sf::send(fd, "SUCCESS");
         }
         else
         {
-            sf::send(fd, "Match Failed");
+            log("DS is not matched~");
+            sf::send(fd, "FAILED");
         }
     }
 }
