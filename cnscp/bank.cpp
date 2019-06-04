@@ -13,6 +13,8 @@ namespace sf = socketfuncs;
 Role Bank
 
 KRb, KUb : RSA
+
+Receive : E(Ks, PI | DS | OIMD) | E(KUb, Ks)
 */
 
 uint64_t KRb[2], KUb[2];
@@ -30,7 +32,9 @@ int main(int argc, char *argv[])
     KUb[0] = n; KUb[1] = d;
     cout << "[KRb KUb] [n, e, d] [" << n << ", " << e << ", " << d << "]" << endl;
 
-    SocketServer ss(9999, process);
+    cout << "Bank Server Init..." << endl;
+    SocketServer ss(kBankPort, process);
+    cout << "Bank Server Run..." << endl;
     ss.run();
 
     return 0;

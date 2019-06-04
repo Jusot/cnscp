@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     cout << "Receive KUb..." << endl;
     // receive KUb
     {
-        SocketClient sc("127.0.0.1", 8888);
+        SocketClient sc("127.0.0.1", kBankPort);
         sc.send("GET KUb");
         auto res = sc.recv();
         auto p = reinterpret_cast<uint64_t *>(res.data());
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     }
     cout << "[KUb] [" << KUb[0] << ", " << KUb[1] << "]" << endl;
 
-    SocketClient sc("127.0.0.1", 7777);
+    SocketClient sc("127.0.0.1", kBankPort);
     while (true)
     {
         string PI, OI;

@@ -10,6 +10,9 @@ constexpr uint64_t kRSAKeyMax = 1000000;
 
 constexpr size_t kPILen = 1024;
 constexpr size_t kOILen = 1024;
+
+constexpr int kMerchantPort = 8888;
+constexpr int kBankPort = 9999;
 }
 
 #endif
