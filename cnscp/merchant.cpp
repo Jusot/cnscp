@@ -5,11 +5,11 @@
 #include <iostream>
 
 #include "general.hpp"
-#include "../algorithms/sha.hpp"
-#include "../algorithms/rsa.hpp"
+#include "../algorithms/sha.cpp"
+#include "../algorithms/rsa.cpp"
 #include "common/socketfuncs.hpp"
-#include "common/socketclient.hpp"
-#include "common/socketserver.hpp"
+#include "common/socketclient.cpp"
+#include "common/socketserver.cpp"
 
 using namespace std;
 using namespace cnscp;
@@ -55,20 +55,9 @@ tuple<bool, string> check_data(const string &data)
     string POMD_recv;
     {
         vector<uint64_t> temp;
-        for (int i = 0; i < 32; ++i)
-        {
-            temp.push_back
-            (
-                (DS[i * 8 + 0] << 56) |
-                (DS[i * 8 + 1] << 48) |
-                (DS[i * 8 + 2] << 40) |
-                (DS[i * 8 + 3] << 32) |
-                (DS[i * 8 + 4] << 24) |
-                (DS[i * 8 + 5] << 16) |
-                (DS[i * 8 + 6] <<  8) |
-                (DS[i * 8 + 7])
-            );
-        }
+        auto p = reinterpret_cast<uint64_t *>(DS.data());
+        for (size_t i = 0; i < DS.size() / 8; ++i)
+            temp.push_back(*p++);
         temp = RSA::crypt(KUc[0], KUc[1], temp);
         for (auto t : temp) POMD_recv.push_back(t & 0xFF);
     }

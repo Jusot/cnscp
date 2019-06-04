@@ -134,5 +134,6 @@ tuple<uint64_t, uint64_t, uint64_t> gen_ned(uint64_t prime_size, string key)
     uint64_t n = p * q;
     uint64_t e = choose_emax(p, q);
     uint64_t d = choose_d(p, q, e);
+    return make_tuple(n, e, d);
 }
 } // namespace RSA

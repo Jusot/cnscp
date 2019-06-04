@@ -90,12 +90,12 @@ array<uint8_t, kLength * (kRounds + 1)> gen_round_keys(const array<uint8_t, kLen
 
     auto *round_keys_ptr = round_keys.data();
 
-    for (int i = 0; i < kLength; ++i)
+    for (size_t i = 0; i < kLength; ++i)
         *round_keys_ptr++ = key[i];
 
     array<uint8_t, 4> temp;
     auto last4bytes = round_keys_ptr - 4;
-    for (int i = 0; i < kRounds; ++i)
+    for (size_t i = 0; i < kRounds; ++i)
     {
         temp[3] = SBOX[*last4bytes++];
         temp[0] = SBOX[*last4bytes++];
@@ -108,7 +108,7 @@ array<uint8_t, kLength * (kRounds + 1)> gen_round_keys(const array<uint8_t, kLen
         for (auto t : temp)
             *round_keys_ptr++ = t ^ *last_round_key_ptr++;
 
-        for (int j = 0; j < kLength - temp.size(); ++j)
+        for (size_t j = 0; j < kLength - temp.size(); ++j)
             *round_keys_ptr++ = *last4bytes++ ^ *last_round_key_ptr++;
     }
 
@@ -129,12 +129,12 @@ encrypt_block(array<uint8_t, kLength> P, const array<uint8_t, kLength> &Key)
     {
         array<uint8_t, kLength> T;
 
-        for (int i = 0; i < kLength; ++i)
+        for (size_t i = 0; i < kLength; ++i)
             T[i] = SBOX[P[i]];
 
         shift_rows(T);
 
-        for (int i = 0; i < kLength; i += 4)
+        for (size_t i = 0; i < kLength; i += 4)
         {
             uint8_t t = T[i] ^ T[i + 1] ^ T[i + 2] ^ T[i + 3];
             P[i    ] = mul2(T[i    ] ^ T[i + 1]) ^ T[i    ] ^ t;
@@ -143,16 +143,16 @@ encrypt_block(array<uint8_t, kLength> P, const array<uint8_t, kLength> &Key)
             P[i + 3] = mul2(T[i + 3] ^ T[i    ]) ^ T[i + 3] ^ t;
         }
 
-        for (int i = 0; i < kLength; ++i)
+        for (size_t i = 0; i < kLength; ++i)
             P[i] ^= *key++;
     }
 
-    for (int i = 0; i < kLength; ++i)
+    for (size_t i = 0; i < kLength; ++i)
         P[i] = SBOX[P[i]];
 
     shift_rows(P);
 
-    for (int i = 0; i < kLength; ++i)
+    for (size_t i = 0; i < kLength; ++i)
         P[i] ^= *key++;
 
     return P;
@@ -164,23 +164,23 @@ decrypt_block(array<uint8_t, kLength> C, const array<uint8_t, kLength> &key)
     auto round_keys = gen_round_keys(key);
     auto round_keys_ptr = round_keys.data() + 160;
 
-    for (int i = 0; i < kLength; ++i)
+    for (size_t i = 0; i < kLength; ++i)
         C[i] ^= round_keys_ptr[i];
 
     inv_shift_rows(C);
 
-    for (int i = 0; i < kLength; ++i)
+    for (size_t i = 0; i < kLength; ++i)
         C[i] = INV_SBOX[C[i]];
 
     round_keys_ptr -= kLength;
-    for (int j = 1; j < kRounds; ++j, round_keys_ptr -= 16)
+    for (size_t j = 1; j < kRounds; ++j, round_keys_ptr -= 16)
     {
         array<uint8_t, kLength> T;
 
-        for (int i = 0; i < kLength; ++i)
+        for (size_t i = 0; i < kLength; ++i)
             T[i] = C[i] ^ round_keys_ptr[i];
 
-        for (int i = 0; i < kLength; i += 4)
+        for (size_t i = 0; i < kLength; i += 4)
         {
             uint8_t t = T[i] ^ T[i + 1] ^ T[i + 2] ^ T[i + 3], u, v;
             C[i    ] = mul2(T[i    ] ^ T[i + 1]) ^ T[i    ] ^ t;
@@ -198,11 +198,11 @@ decrypt_block(array<uint8_t, kLength> C, const array<uint8_t, kLength> &key)
 
         inv_shift_rows(C);
 
-        for (int i = 0; i < kLength; ++i)
+        for (size_t i = 0; i < kLength; ++i)
             C[i] = INV_SBOX[C[i]];
     }
 
-    for (int i = 0; i < kLength; ++i)
+    for (size_t i = 0; i < kLength; ++i)
         C[i] ^= round_keys_ptr[i];
 
     return C;

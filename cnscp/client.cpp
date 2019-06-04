@@ -6,10 +6,10 @@
 #include <iostream>
 
 #include "general.hpp"
-#include "../algorithms/aes.hpp"
-#include "../algorithms/rsa.hpp"
-#include "../algorithms/sha.hpp"
-#include "common/socketclient.hpp"
+#include "../algorithms/aes.cpp"
+#include "../algorithms/rsa.cpp"
+#include "../algorithms/sha.cpp"
+#include "common/socketclient.cpp"
 
 using namespace std;
 using namespace cnscp;
@@ -90,17 +90,17 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
     {
         assert(POMD.size() == 32);
         auto DS_tmp = RSA::crypt(KRc[0], KRc[1], vector<uint64_t>(POMD.begin(), POMD.end()));
-        for (auto ui : DS_tmp)
-            for (int i = 56; i >= 0; i -= 8)
-                DS.push_back((ui >> i) & 0xFF);
+        auto p = reinterpret_cast<char *>(DS_tmp.data());
+        for (size_t i = 0; i < DS_tmp.size() * 8; ++i)
+            DS.push_back(*p++);
     }
 
     result += AES::_128::encrypt(PI + DS + OIMD, Ks);
     {
         auto temp = RSA::crypt(KUb[0], KUb[1], vector<uint64_t>(Ks.begin(), Ks.end()));
-        for (auto ui : temp)
-            for (int i = 56; i >= 0; i -= 8)
-                result.push_back((ui >> i) & 0xFF);
+        auto p = reinterpret_cast<char *>(temp.data());
+        for (size_t i = 0; i < temp.size() * 8; ++i)
+            DS.push_back(*p++);
     }
     result += PIMD + OI + DS;
     {
