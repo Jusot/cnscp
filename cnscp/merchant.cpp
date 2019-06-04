@@ -59,6 +59,18 @@ tuple<bool, string> check_data(const string &data)
         for (auto t : temp) POMD_recv.push_back(t & 0xFF);
     }
 
+    {
+        log("PIMD: ");
+        for (auto c : PIMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("OIMD: ");
+        for (auto c : OIMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("POMD: ");
+        for (auto c : POMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+    }
+
     if (POMD == POMD_recv) return make_tuple(true, DS);
     else return make_tuple(false, DS);
 }
@@ -69,7 +81,13 @@ void process(int fd)
     SocketClient sc("127.0.0.1", kBankPort);
 
     auto d4b = data.substr(0, kPILen + 416),
-         d4m = data.substr(kPILen + 416);
+         d4m = data.substr(kPILen + 416, kOILen + 304);
+
+    {
+        log("recv data: ");
+        for (auto c : data) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+    }
 
     auto [matched, DS] = check_data(d4m);
     if (matched)

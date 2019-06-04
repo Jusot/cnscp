@@ -65,9 +65,7 @@ int main(int argc, char *argv[])
         string PI, OI;
         cin >> PI >> OI;
         auto data = gen_info(PI, OI, KRc, KUc, KUb);
-        log("Data: ");
-        for (auto c : data) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
+
         sc.send(data);
     }
 
@@ -105,6 +103,21 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
     }
     result += PIMD + OI + DS;
     result.insert(result.end(), (char *)KUc, (char *)(KUc + 2));
+
+    {
+        log("PIMD: ");
+        for (auto c : PIMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("OIMD: ");
+        for (auto c : OIMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("POMD: ");
+        for (auto c : POMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("DS  : ");
+        for (auto c : DS) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+    }
 
     //                kPILen | 32*8 | 32    | 8    * 16  | 32   | kOILen | 32*8 | 16
     // result = E(Ks, PI     | DS   | OIMD) | E(KUb, Ks) | PIMD | OI     | DS   | KUc
