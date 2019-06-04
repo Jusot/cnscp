@@ -67,9 +67,6 @@ tuple<bool, string> check_data(const string &data)
         log("POMD: ");
         for (auto c : POMD) cout << hex << (unsigned int)(unsigned char)c;
         cout << endl;
-        log("DS_recv: ");
-        for (auto c : DS) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
         log("POMD_recv: ");
         for (auto c : POMD_recv) cout << hex << (unsigned int)(unsigned char)c;
         cout << endl;

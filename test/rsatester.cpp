@@ -6,7 +6,7 @@ using namespace RSA;
 
 int main()
 {
-    uint64_t prime_size = 100000000;
+    uint64_t prime_size = 1000;
 
     uint64_t p = random_prime("bobobobobo", prime_size);
     uint64_t q = random_prime("lololololo", prime_size);
@@ -14,7 +14,7 @@ int main()
     uint64_t e = choose_emax(p, q);
     uint64_t d = choose_d(p, q, e);
 
-    vector<uint64_t> M { 3462,34543,2345,234,6788 };
+    vector<uint64_t> M { 3462, 34543, 2345, 234, 6788 };
 
     auto C = crypt(n, e, M);
     auto rM = crypt(n, d, C);

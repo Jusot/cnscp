@@ -75,6 +75,15 @@ tuple<bool, string> check_data(const string &data)
         for (auto t : temp) POMD_recv.push_back(t & 0xFF);
     }
 
+    {
+        log("POMD: ");
+        for (auto c : POMD) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+        log("POMD_recv: ");
+        for (auto c : POMD_recv) cout << hex << (unsigned int)(unsigned char)c;
+        cout << endl;
+    }
+
     if (POMD == POMD_recv) return make_tuple(true, DS);
     else return make_tuple(false, DS);
 }

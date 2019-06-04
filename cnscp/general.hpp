@@ -9,7 +9,7 @@
 
 namespace cnscp
 {
-constexpr uint64_t kRSAPrimeMax = 10000;
+constexpr uint64_t kRSAPrimeMax = 1000;
 
 constexpr size_t kPILen = 1024;
 constexpr size_t kOILen = 1024;

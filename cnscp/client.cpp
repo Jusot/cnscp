@@ -62,6 +62,8 @@ int main(int argc, char *argv[])
     {
         SocketClient sc("127.0.0.1", kMerchantPort);
 
+        cout << "Please Input PI and OI: " << endl;
+
         string PI, OI;
         cin >> PI >> OI;
         auto data = gen_info(PI, OI, KRc, KUc, KUb);
@@ -94,29 +96,8 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
         assert(POMD.size() == 32);
         vector<uint64_t> DS_tmp;
         for (auto c : POMD) DS_tmp.push_back(c & 0xFF);
-
-        {
-            log("DS_tmp raw: ");
-            for (auto c : DS_tmp) cout << hex << c;
-            cout << endl;
-        }
-
-        DS_tmp = RSA::crypt(
-            KRc[0], KRc[1],
-            DS_tmp
-        );
+        DS_tmp = RSA::crypt(KRc[0], KRc[1], DS_tmp);
         DS.insert(DS.end(), (char *)DS_tmp.data(), (char *)(DS_tmp.data() + DS_tmp.size()));
-
-        {
-            log("DS_tmp encrypted: ");
-            for (auto c : DS_tmp) cout << hex << c;
-            cout << endl;
-
-            DS_tmp = RSA::crypt(KUc[0], KUc[1], DS_tmp);
-            log("DS_tmp decrypted: ");
-            for (auto c : DS_tmp) cout << hex << c;
-            cout << endl;
-        }
     }
 
     result += AES::_128::encrypt(PI + DS + OIMD, Ks);
@@ -128,17 +109,8 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
     result.insert(result.end(), (char *)KUc, (char *)(KUc + 2));
 
     {
-        log("PIMD: ");
-        for (auto c : PIMD) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
-        log("OIMD: ");
-        for (auto c : OIMD) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
         log("POMD: ");
         for (auto c : POMD) cout << hex << (unsigned int)(unsigned char)c;
-        cout << endl;
-        log("DS  : ");
-        for (auto c : DS) cout << hex << (unsigned int)(unsigned char)c;
         cout << endl;
     }
 
