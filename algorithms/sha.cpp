@@ -106,7 +106,7 @@ sha256(const vector<uint8_t> &raw)
     for (size_t i = 0; i < input.size(); i += 16)
     {
         array<uint32_t, 16> M;
-        for (auto j = i; j < i + 16; ++j)
+        for (size_t j = 0; j < 16; ++j)
         {
             M[j] = input[i + j];
         }
@@ -114,17 +114,17 @@ sha256(const vector<uint8_t> &raw)
         auto [A, B, C, D, E, F, G, H] = res;
 
         array<uint32_t, 64> W;
-        for (int i = 0; i < 16; ++i)
+        for (int j = 0; j < 16; ++j)
         {
-            W[i] = M[i];
+            W[j] = M[j];
         }
-        for (int i = 16; i < 64; ++i)
+        for (int j = 16; j < 64; ++j)
         {
-            W[i] = (ssig1(W[i - 2]) + W[i - 7] + ssig0(W[i - 15]) + W[i - 16]) & 0xFFFFFFFF;
+            W[j] = (ssig1(W[j - 2]) + W[j - 7] + ssig0(W[j - 15]) + W[j - 16]) & 0xFFFFFFFF;
         }
-        for (int i = 0; i < 64; ++i)
+        for (int j = 0; j < 64; ++j)
         {
-            auto T1 = H + bsig1(E) + ch(E, F, G) + K[i] + W[i];
+            auto T1 = H + bsig1(E) + ch(E, F, G) + K[j] + W[j];
             auto T2 = bsig0(A) + maj(A, B, C);
 
             tie(H, G, F, E, D, C, B, A) = make_tuple
@@ -134,9 +134,9 @@ sha256(const vector<uint8_t> &raw)
         }
 
         array<uint32_t, 8> vs = { A, B, C, D, E, F, G, H };
-        for (size_t i = 0; i < 8; ++i)
+        for (size_t j = 0; j < 8; ++j)
         {
-            res[i] = (res[i] + vs[i]) & 0xFFFFFFFF;
+            res[j] = (res[j] + vs[j]) & 0xFFFFFFFF;
         }
     }
 
