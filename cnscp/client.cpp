@@ -102,7 +102,9 @@ string gen_info(string PI, string OI, uint64_t KRc[], uint64_t KUc[], uint64_t K
 
     result += AES::_128::encrypt(PI + DS + OIMD, Ks);
     {
-        auto encrypted_Ks_tmp = RSA::crypt(KUb[0], KUb[1], vector<uint64_t>(Ks.begin(), Ks.end()));
+        vector<uint64_t> encrypted_Ks_tmp;
+        for (auto c : Ks) encrypted_Ks_tmp.push_back(c & 0xFF);
+        encrypted_Ks_tmp = RSA::crypt(KUb[0], KUb[1], encrypted_Ks_tmp);
         result.insert(result.end(), (char *)encrypted_Ks_tmp.data(), (char *)(encrypted_Ks_tmp.data() + encrypted_Ks_tmp.size()));
     }
     result += PIMD + OI + DS;
