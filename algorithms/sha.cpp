@@ -127,7 +127,7 @@ sha256(const vector<uint8_t> &raw)
             auto T1 = H + bsig1(E) + ch(E, F, G) + K[j] + W[j];
             auto T2 = bsig0(A) + maj(A, B, C);
 
-            tie(H, G, F, E, D, C, B, A) = make_tuple
+            tie(H, G, F, E     , D, C, B, A) = make_tuple
             (
                 G, F, E, D + T1, C, B, A, T1 + T2
             );
