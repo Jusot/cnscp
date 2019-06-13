@@ -9,6 +9,6 @@ using namespace SHA;
 
 int main()
 {
-    TEST("woaini luoyuexuan");
+    TEST("wo you yi zhi xiao mao lv wo cong lai ye bu qi");
     return 0;
 }

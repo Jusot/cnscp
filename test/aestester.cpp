@@ -7,13 +7,13 @@ namespace AES128 = AES::_128;
 
 int main()
 {
-    string M = "woaini";
-    string key = "luoyuexuan";
+    string M = "hahaha";
+    string key = "hehehe";
 
     auto C = AES128::encrypt(M, key);
     auto Res = AES128::decrypt(C, key);
 
-    cout << C << endl;
+    for (auto c : C) cout << hex << (unsigned int)(unsigned char)c; cout << endl;
     cout << Res << endl;
 
     return 0;
