@@ -118,7 +118,6 @@ array<uint8_t, kLength * (kRounds + 1)> gen_round_keys(const array<uint8_t, kLen
 array<uint8_t, kLength>
 encrypt_block(array<uint8_t, kLength> P, const array<uint8_t, kLength> &Key)
 {
-
     auto K = gen_round_keys(Key);
     auto key = K.data();
 
