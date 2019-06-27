@@ -2,4 +2,4 @@
 computer network security course project
 
 ## POSTER
-![poster](./poster.png)
+![poster](./docs/poster.png)
